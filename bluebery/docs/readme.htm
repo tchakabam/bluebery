@@ -1,0 +1,163 @@
+<html>
+
+<style type="text/css">
+<!--
+.style2 {font-family: Verdana, Arial, Helvetica, sans-serif;color:blue;}
+-->
+</style> 
+<head><title>bluebery beta 1.0 readme</title></head> 
+
+<div align="center">
+  <h1 class="style2">bluebery</h1>
+  <h2><span class="style2">or how to position content in 3 dimensions </span></h2>
+</div>
+<p><center>
+  <h2><a href="http://sourceforge.net/projects/bluebery"> sourceforge.net/projects/bluebery</a></h2>
+</center></p>
+<p>Content can be positioned on a 3-axis-system. We will call these axes key, type and language. Additionally we will add a time-dependent factor that effects each point in this space. That means that foreach point determined by the values of the variables that scale our axes their exists differentiable content for any point on the time-axis. Every possible point in our  3-axis plus time system represents a link to an information. Therefore we will call the points in the information-space-time entities.Every entity holds an information that can be represented with a number. Bluebery is an implementation of such a system using php as a frontend to in-and output values that are stored in a mySQL table wich is used to represent the timespace. The table has a column for each axis including the time-axis plus a column where the information that should hold every entity is stored. So here, an entity is namely an SQL row. </p>
+<center><p><a href="http://sourceforge.net/projects/bluebery"></a>
+  <h3>Ok lets stop talkin, forget the three axis stuff and all that and lets get technical.....  </h3>
+  <p>A simple example onhow to use bluebery for a news system on a webpage:
+  <p>Lets say you have one file wich displays all the news descriptions (a little text with a date, an image..) and another file wich will be the template to display a type of newsarticles, so again, text(s), date, images.... 
+  </p>
+  </center>
+  <div style=" position:relative; left:60px; color:#0000FF;">
+  <p>
+<code>
+<pre>
+
+&lt!-- list of all article descriptions --&gt;
+
+&lt;?
+//import bluebery/PFFF libs
+require_once "../bluebery.php";
+?&gt; 
+
+&lt;table width="370" align="left" border="0" cellpadding="10"&gt;
+&lt;?
+  //here we fetch the desired dataset from the bluebery sql peer (configured in bluesql.php)
+  //namely all news description texts in french
+  //ordering is optional, we could also order by date, but would have to replace date by 'b_content1' wich is the physical column name.
+  //further versions will be enabled of smoother ordering methods but we'll keep the sql way too..
+   
+  $newsdes = getEntitiesByType("NEWSDES", "fr", "ORDER BY id DESC");
+  
+  //now we iterate through all of them descriptions
+  
+  while($entity = nextEntity( $newsdes ) ) 
+  {
+  ?&gt;
+          &lt;tr&gt;
+		    &lt;td&gt;
+			&lt;p class="newsdesc.date"&gt;
+			   &lt;?
+			      //display the date wich is a field of the entity
+			      echo getEntityDate($entity)
+			   ?&gt;
+			&lt;/p&gt;
+			&lt;p class="newsdesc.date"&gt;
+			   &lt;? 
+			      //also display the content
+				  echo getContent($entity) 
+			   ?&gt;
+			&lt;/p&gt;
+			&lt;p class="newsdesc.img"&gt;
+			  &lt;!-- add a link to the article page --&gt;
+			  &lt;a href="desc.php?key=&lt;? echo getKey($entity) ?&gt;" target="desc"&gt;
+			          &lt;?
+				  //display an image with a blue hover effect 
+				  echo htmlImgGeneric("../icons/arrow_right_blue.png", "../icons/arrow_right_white.png");  
+				  ?&gt;
+			  &lt;/a&gt;
+			&lt;/p&gt;
+		    &lt;/td&gt;
+	&lt;/tr&gt;
+   &lt;?
+   }
+   ?&gt;
+&lt;/table&gt;
+</pre>
+</code>
+</p>
+</div>
+ 
+ <center>...and now the article: </center>
+
+  <div style=" position:relative; left:60px; color:#0000FF;">
+  <p>
+<code>
+<pre>
+
+&lt;?
+//import bluebery/PFFF libs
+require_once "../bluebery.php";
+
+//we fetch the key of the first entity of type NEWSCONTENT in case we get called with no args 
+$key = getKey( nextEntity( getEntitiesByType( "NEWSCONTENT", "de", "ORDER BY id DESC")));
+
+//we fetch the key from the GET args
+if (isset($_GET["key"])) $key =  $_GET["key"];
+
+?&gt;
+
+&lt;center&gt;
+&lt;img src="
+  &lt;?
+ //here we fetch the src of an image stored in an entity of type ARTIMG with with the corresponding key usable for all languages
+ echo getContent ( getEntity($key, "ARTIMG", "all") ); 
+ ?&gt;
+             " height="145" align="ABSMIDDLE" style=" border-color:#FFFFFF;" border="1"&gt;
+&lt;/center&gt;
+
+&lt;table cellpadding="20"&gt;
+&lt;tr&gt;&lt;td&gt;
+
+&lt;p style="font-family:Arial, Helvetica, sans-serif; font-size:14px; text-indent:10px;"&gt;
+&lt;strong&gt;
+   &lt;?
+      //display the content of the newstitle entity of corresponding key in german 
+      echo getContent ( getEntity($key, "NEWSTITLE", "de") ); 
+   ?&gt;
+   &lt;/strong&gt;&lt;/font&gt;
+&lt;/p&gt;
+&lt;p align="left" style="font-family:Arial, Helvetica, sans-serif; font-size:12px; text-indent:10px;"&gt;
+&lt;?
+      //display the textual content of the article 
+      echo getContent ( getEntity($key, "NEWSCONTENT", "de") ); 
+?&gt;
+&lt;/p&gt;
+
+&lt;/td&gt;&lt;/tr&gt;
+&lt;/table&gt;	
+
+</pre>
+</code>
+</p>
+</div>
+
+<center>finally the sql peer config...</center>
+
+
+<div style=" position:relative; left:60px; color:#0000FF;">
+<p>
+<code>
+<pre>
+&lt;?
+$sql_host = "localhost";
+$sql_usr = "myuser";
+$sql_pwd = "mypass";
+$sql_db = "mydbname";
+?&gt;
+</pre>
+</code>
+</p>
+</div>
+
+<center>and a screenshot of the webinterface you use to input the data....all you have to do to get this is run the build_db script after configuring the peer in the bluesql file.
+<p>
+<img src="screenshot.JPG" />
+</p>
+</center>
+
+</html>
+
